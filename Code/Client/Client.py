@@ -6,6 +6,7 @@ import struct
 import threading
 from PID import *
 from Face import *
+from Cat import *
 import numpy as np
 from Thread import *
 from PIL import Image
@@ -14,6 +15,7 @@ from Command import COMMAND as cmd
 class Client:
     def __init__(self):
         self.face = Face()
+        self.cat = Cat()
         self.pid=Incremental_PID(1,0,0.0025)
         self.tcp_flag=False
         self.video_flag=True
@@ -116,6 +118,11 @@ class Client:
                            self.Looking_for_the_ball()
                         elif self.face_flag and self.face_id==False:
                             self.face.face_detect(self.image)
+                        elif self.cat_flag and self.face_id == False:  
+                            if self.cat.detect_cat(self.image):
+                                print("Cat detected")
+                                self.cat.detect_cat(self.image)
+
                         self.video_flag=False
             except BaseException as e:
                 print (e)
