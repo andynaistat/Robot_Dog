@@ -21,6 +21,7 @@ class Client:
         self.video_flag=True
         self.ball_flag=False
         self.face_flag=False
+        self.cat_flag=False
         self.face_id = False
         self.image=''
     def turn_on_client(self,ip):
@@ -121,7 +122,7 @@ class Client:
                         elif self.cat_flag and self.face_id == False:  
                             if self.cat.detect_cat(self.image):
                                 print("Cat detected")
-                                self.cat.detect_cat(self.image)
+                                # self.cat.detect_cat(self.image)
 
                         self.video_flag=False
             except BaseException as e:
