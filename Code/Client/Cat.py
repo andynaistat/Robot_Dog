@@ -6,12 +6,12 @@ import numpy as np
 class Cat:
     def __init__(self):
         # Utiliza el modelo de detección de gatos
-        self.detector = cv2.CascadeClassifier("haarcascade_frontalcatface.xml")
+        self.detector = cv2.CascadeClassifier("Cat/haarcascade_frontalcatface.xml")
     
     def detect_cat(self, img):
         try:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            cats = self.detector.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
+            cats = self.detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
             if len(cats) > 0:
                 for (x, y, w, h) in cats:
                     cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
