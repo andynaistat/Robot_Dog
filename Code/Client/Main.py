@@ -346,17 +346,25 @@ class MyWindow(QMainWindow,Ui_client):
     #BALL
     def chase_ball_and_find_face(self):
         if self.Button_Ball_And_Face.text() == 'Face':
-            self.client.face_flag=True
-            self.client.ball_flag = False
+            self.client.face_flag=False
+            self.client.ball_flag = True
+            self.client.cat_flag = False
             self.Button_Ball_And_Face.setText('Ball')
         elif self.Button_Ball_And_Face.text() == 'Ball':
             self.client.face_flag=False
-            self.client.ball_flag = True
+            self.client.ball_flag = False
+            self.client.cat_flag = True
+            self.Button_Ball_And_Face.setText('Cat')
+        elif self.Button_Ball_And_Face.text() == 'Cat':
+            self.client.face_flag=False
+            self.client.ball_flag = False
+            self.client.cat_flag = False
+            self.stop()
             self.Button_Ball_And_Face.setText('Close')
         else:
-            self.client.face_flag = False
+            self.client.face_flag = True
             self.client.ball_flag = False
-            self.stop()
+            self.client.cat_flag = False
             self.Button_Ball_And_Face.setText('Face')
 
     #CONNECT

@@ -23,6 +23,7 @@ class Client:
         self.face_flag=False
         self.cat_flag=False
         self.face_id = False
+        self.cat_flag=False
         self.image=''
     def turn_on_client(self,ip):
         self.client_socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -547,7 +547,7 @@ class Ui_client(object):
         self.label_height.setText(_translate("client", "0"))
         self.label_horizon.setText(_translate("client", "0"))
         self.Button_Calibration.setText(_translate("client", "Calibration"))
-        self.Button_Ball_And_Face.setText(_translate("client", "Face"))
+        self.Button_Ball_And_Face.setText(_translate("client", "Close"))
         self.Button_Sonic.setText(_translate("client", "Sonic"))
         self.Button_Face_ID.setText(_translate("client", "Face ID"))
         self.Button_LED.setText(_translate("client", "LED"))
