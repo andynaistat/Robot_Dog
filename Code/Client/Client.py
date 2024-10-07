@@ -120,9 +120,7 @@ class Client:
                         elif self.face_flag and self.face_id==False:
                             self.face.face_detect(self.image)
                         elif self.cat_flag and self.face_id == False:  
-                            if self.cat.detect_cat(self.image):
-                                print("Cat detected")
-                                # self.cat.detect_cat(self.image)
+                            self.cat.chase_cat(self.image)
 
                         self.video_flag=False
             except BaseException as e:
