@@ -121,7 +121,7 @@ class Client:
                         elif self.face_flag and self.face_id==False:
                             self.face.face_detect(self.image)
                         elif self.cat_flag and self.face_id == False:  
-                            self.cat.chase_cat(self.image)
+                            self.chase_cat(self.image)
 
                         self.video_flag=False
             except BaseException as e:
@@ -141,7 +141,7 @@ class Client:
     
     
     def chase_cat(self, img):
-        cat_position = self.detect_cat(img)  # Solo obtenemos la posición del primer gato
+        cat_position = self.cat.detect_cat(img)  # Solo obtenemos la posición del gato
         if cat_position:
             x, y, w, h = cat_position
             center_x = x + w // 2  # Coordenada X del centro del gato
@@ -171,12 +171,11 @@ class Client:
                 else:
                     command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
 
-            self.send_data(command)  # Enviamos el comando para mover el robot
+            self.send_data(command)
         else:
             command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
             self.send_data(command)  # Detenemos el robot si no hay gato
     
-
 
 if __name__ == '__main__':
     pass
