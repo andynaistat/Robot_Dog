@@ -4,10 +4,12 @@ import copy
 import socket
 import struct
 import threading
+from Sonic import *
 from PID import *
 from Face import *
 from Cat import *
 import numpy as np
+from Sonic import Sonic
 from Thread import *
 from PIL import Image
 from Command import COMMAND as cmd
@@ -16,15 +18,20 @@ class Client:
     def __init__(self):
         self.face = Face()
         self.cat = Cat()
-        self.pid=Incremental_PID(1,0,0.0025)
-        self.tcp_flag=False
-        self.video_flag=True
-        self.ball_flag=False
-        self.face_flag=False
-        self.cat_flag=False
+        self.pid = Incremental_PID(1, 0, 0.0025)
+        self.tcp_flag = False
+        self.video_flag = True
+        self.ball_flag = False
+        self.face_flag = False
+        self.cat_flag = False
         self.face_id = False
-        self.cat_flag=False
-        self.image=''
+        self.cat_flag = False
+        self.image = ''
+        self.sonic = None  # Inicializar Sonic más adelante
+    def initialize_sonic(self):
+        from Sonic import Sonic  # Importación dentro del método para evitar ciclo
+        self.sonic = Sonic(self)
+
     def turn_on_client(self,ip):
         self.client_socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -100,6 +107,7 @@ class Client:
             command=cmd.CMD_MOVE_STOP+"#"+self.move_speed+'\n'
             self.send_data(command)
             #print (command)
+
     def receiving_video(self,ip):
         stream_bytes = b' '
         try:
@@ -116,12 +124,12 @@ class Client:
                 if self.is_valid_image_4_bytes(jpg):
                     if self.video_flag:
                         self.image = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
-                        if self.ball_flag and self.face_id==False:
+                        if self.ball_flag and self.face_id==False and self.cat_flag==False:
                            self.Looking_for_the_ball()
-                        elif self.face_flag and self.face_id==False:
+                        elif self.face_flag and self.face_id==False and self.cat_flag==False:
                             self.face.face_detect(self.image)
-                        elif self.cat_flag and self.face_id == False:  
-                            self.cat.detect_cat(self.image)
+                        elif self.cat_flag and self.face_id == False and self.face_flag==False:  
+                            self.chase_cat(self.image)
                                 #print("Cat detected")
                                 # self.cat.detect_cat(self.image)
 
@@ -129,6 +137,15 @@ class Client:
             except BaseException as e:
                 print (e)
                 break
+
+    def chase_cat(self, img):
+        if self.cat.detect_cat(img):
+            self.sonic.sonic()
+            distance=self.sonic.getDistance()
+            while distance>2:
+                distance=distance-1
+                self.send_data(cmd.CMD_MOVE_FORWARD+"#"+self.move_speed+'\n')
+                
 
     def send_data(self,data):
         if self.tcp_flag:

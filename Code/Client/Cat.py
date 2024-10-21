@@ -21,21 +21,3 @@ class Cat:
         except Exception as e:
             print(e)
 
-# if __name__ == '__main__':
-#     cat_detector = Cat()
-
-#     # Iniciar captura de video para probar la detección
-#     cap = cv2.VideoCapture(0)
-
-#     while True:
-#         ret, frame = cap.read()
-#         if ret:
-#             cat_detector.detect_cat(frame)
-#             cv2.imshow('Gato Detector', frame)
-        
-#         # Presionar 'q' para salir
-#         if cv2.waitKey(1) & 0xFF == ord('q'):
-#             break
-
-#     cap.release()
-#     cv2.destroyAllWindows()
