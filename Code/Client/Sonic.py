@@ -2,6 +2,7 @@ from PyQt5.QtCore import QTimer
 from Command import COMMAND as cmd
 from ui_client import Ui_client
 from Client import *
+from PyQt5.QtWidgets import QPushButton
 
 class Sonic(Ui_client):
     _instance = None  # Atributo de clase para almacenar la instancia
@@ -15,6 +16,7 @@ class Sonic(Ui_client):
         self.client = client
         self.distance = 0  # Inicializa la distancia
         self.timer_sonic = QTimer()  # Inicializa el QTimer para Sonic
+        self.Button_Sonic = QPushButton('Sonic')
 
     def sonic(self):
         if self.Button_Sonic.text() == 'Sonic':
