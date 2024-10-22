@@ -128,10 +128,8 @@ class Client:
                            self.Looking_for_the_ball()
                         elif self.face_flag and self.face_id==False and self.cat_flag==False:
                             self.face.face_detect(self.image)
-                        elif self.cat_flag and self.face_id == False and self.face_flag==False:  
+                        elif self.cat_flag and self.face_id == False:  
                             self.chase_cat(self.image)
-                                #print("Cat detected")
-                                # self.cat.detect_cat(self.image)
 
                         self.video_flag=False
             except BaseException as e:
@@ -157,6 +155,44 @@ class Client:
         data=""
         data=self.client_socket1.recv(1024).decode('utf-8')
         return data
- 
+    
+    
+    def chase_cat(self, img):
+        cat_position = self.cat.detect_cat(img)  # Solo obtenemos la posición del gato
+        if cat_position:
+            x, y, w, h = cat_position
+            center_x = x + w // 2  # Coordenada X del centro del gato
+            center_y = y + h // 2  # Coordenada Y del centro del gato
+            
+            # Tamaño de la imagen (ajusta estos valores según la resolución de tu cámara)
+            img_width = img.shape[1]
+            img_height = img.shape[0]
+
+            # Parámetros para el movimiento
+            threshold_x = 20  # Umbral para determinar si girar o avanzar
+            threshold_y = 50  # Umbral para determinar si detenerse o avanzar
+            
+            # Calculamos la distancia desde el centro de la imagen
+            error_x = center_x - (img_width // 2)  # Error en la dirección X
+            error_y = center_y - (img_height // 2)  # Error en la dirección Y
+
+            # Movemos el robot según la posición del gato
+            if abs(error_x) > threshold_x:
+                if error_x > 0:
+                    command = cmd.CMD_TURN_RIGHT + "#" + self.move_speed + '\n'
+                else:
+                    command = cmd.CMD_TURN_LEFT + "#" + self.move_speed + '\n'
+            else:
+                if abs(error_y) > threshold_y:
+                    command = cmd.CMD_MOVE_FORWARD + "#" + self.move_speed + '\n'
+                else:
+                    command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
+
+            self.send_data(command)
+        else:
+            command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
+            self.send_data(command)  # Detenemos el robot si no hay gato
+    
+
 if __name__ == '__main__':
     pass
