@@ -151,6 +151,7 @@ class Client:
         self.min_distance = 10 # Distancia mínima para detenerse
         cat_position = self.cat.detect_cat(img)  # Solo obtenemos la posición del gato
         if cat_position:
+            self.bark()  # Ladra si detecta al gato
             x, y, w, h = cat_position
             center_x = x + w // 2  # Coordenada X del centro del gato
             img_width = img.shape[1]
@@ -190,5 +191,8 @@ class Client:
             command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
             self.send_data(command)
 
+    def bark(self):
+        command = cmd.CMD_BARK + "#\n"
+        self.send_data(command)
 if __name__ == '__main__':
     pass

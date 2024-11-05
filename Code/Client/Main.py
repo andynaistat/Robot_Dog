@@ -483,7 +483,12 @@ class MyWindow(QMainWindow,Ui_client):
             self.client.send_data(command)
             self.Button_Buzzer.setText('Buzzer')
             #print (command)
-            
+    #BARK
+    def bark(self):
+        command=cmd.CMD_BARK+'\n'
+        self.client.send_data(command)
+        #print (command)
+
     #BALANCE
     def imu(self):
         if self.Button_IMU.text()=='Balance':

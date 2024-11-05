@@ -19,5 +19,6 @@ class COMMAND:
     CMD_ATTITUDE = "CMD_ATTITUDE"
     CMD_RELAX = "CMD_RELAX"
     CMD_WORKING_TIME = "CMD_WORKING_TIME"
+    CMD_BARK = "CMD_BARK"
     def __init__(self):
         pass
