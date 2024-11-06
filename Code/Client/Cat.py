@@ -6,7 +6,7 @@ from Command import COMMAND as cmd
 
 class Cat:
     def __init__(self):
-        self.net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
+        self.net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg")
         self.layer_names = self.net.getLayerNames()
         self.output_layers = [self.layer_names[i - 1] for i in self.net.getUnconnectedOutLayers()]
 
