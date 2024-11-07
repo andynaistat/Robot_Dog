@@ -2,7 +2,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 class AudioPlayer:
-    def __init__(self, audio_file):
+    def __init__(self, audio_file='../Audios/small-dog-barking.mp3'):
         self.audio_file = audio_file
 
     def play(self):

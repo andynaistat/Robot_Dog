@@ -33,6 +33,7 @@ class StreamingOutput(io.BufferedIOBase):
 
 class Server:
     def __init__(self):
+        audio_file = "Audios/small-dog-barking.mp3"
         
         self.tcp_flag=False
         self.led=Led()
@@ -41,7 +42,7 @@ class Server:
         self.buzzer=Buzzer()
         self.control=Control()
         self.sonic=Ultrasonic()
-        self.bark=AudioPlayer()
+        self.bark=AudioPlayer(audio_file)
         self.control.Thread_conditiona.start()
         self.battery_voltage=[8.4,8.4,8.4,8.4,8.4]
     def get_interface_ip(self):
@@ -139,7 +140,6 @@ class Server:
             self.control.move_flag= 2  
                   
     def receive_instruction(self):
-        audio_file = "Audios/small-dog-barking.mp3"
         try:
             self.connection1,self.client_address1 = self.server_socket1.accept()
             print ("Client connection successful !")
@@ -174,7 +174,7 @@ class Server:
                 elif cmd.CMD_BUZZER in data:
                     self.buzzer.run(data[1])
                 elif cmd.CMD_BARK in data:
-                    self.bark.play(audio_file)
+                    self.bark.play()
                 elif cmd.CMD_LED in data:
                     try:
                         stop_thread(thread_led)
