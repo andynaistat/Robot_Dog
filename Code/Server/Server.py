@@ -33,7 +33,7 @@ class StreamingOutput(io.BufferedIOBase):
 
 class Server:
     def __init__(self):
-        audio_file = "Audios/small-dog-barking.mp3"
+        audio_file = "../Audios/small-dog-barking.mp3"
         
         self.tcp_flag=False
         self.led=Led()
