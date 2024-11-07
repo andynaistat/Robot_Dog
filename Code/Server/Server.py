@@ -15,11 +15,11 @@ from Led import *
 from Servo import *
 from Thread import *
 from Buzzer import *
-from Bark import *
 from Control import *
 from ADS7830 import *
 from Ultrasonic import *
 from Command import COMMAND as cmd
+from Bark import AudioPlayer
 
 class StreamingOutput(io.BufferedIOBase):
     def __init__(self):
@@ -41,7 +41,7 @@ class Server:
         self.buzzer=Buzzer()
         self.control=Control()
         self.sonic=Ultrasonic()
-        self.bark=Bark()
+        self.bark=AudioPlayer()
         self.control.Thread_conditiona.start()
         self.battery_voltage=[8.4,8.4,8.4,8.4,8.4]
     def get_interface_ip(self):
@@ -174,7 +174,7 @@ class Server:
                 elif cmd.CMD_BUZZER in data:
                     self.buzzer.run(data[1])
                 elif cmd.CMD_BARK in data:
-                    self.bark.run(audio_file)
+                    self.bark.play(audio_file)
                 elif cmd.CMD_LED in data:
                     try:
                         stop_thread(thread_led)
