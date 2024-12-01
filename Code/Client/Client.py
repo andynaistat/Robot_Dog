@@ -148,7 +148,7 @@ class Client:
         return data
 
     def chase_cat(self, img):
-        self.min_distance = 10 # Distancia mínima para detenerse
+        self.min_distance = 8  # Distancia mínima para detenerse
         cat_position = self.cat.detect_cat(img)  # Solo obtenemos la posición del gato
         if cat_position:
             self.bark()  # Ladra si detecta al gato
@@ -157,39 +157,49 @@ class Client:
             img_width = img.shape[1]
             
             # Parámetros para el movimiento lateral
-            threshold_x = 20  # Umbral para determinar si girar a la izquierda o derecha
+            threshold_x = 15  # Umbral para determinar si girar a la izquierda o derecha
             
             # Calculamos el error en X
             error_x = center_x - (img_width // 2)
 
-            # Movemos el robot según la posición del gato (giro lateral)
-            if abs(error_x) > threshold_x:
-                if error_x > 0:
-                    # Gira a la derecha
-                    command = cmd.CMD_TURN_RIGHT + "#" + self.move_speed + '\n'
-                else:
-                    # Gira a la izquierda
-                    command = cmd.CMD_TURN_LEFT + "#" + self.move_speed + '\n'
-                self.send_data(command)
-            else:
-                # Detenemos el giro lateral si el gato está centrado
-                command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
-                self.send_data(command)
+            # Verificamos la distancia con el sensor de ultrasonido
+            distance = self.sonic.getDistance()
 
-            # Verificamos la distancia con el sensor de ultrasonido (avanzar o detenerse)
-            distance = self.sonic.getDistance()  # Obtener distancia del sensor
-            if distance > self.min_distance:
-                # Si la distancia es mayor que el umbral, avanzamos
-                command = cmd.CMD_MOVE_FORWARD + "#" + self.move_speed + '\n'
-            else:
-                # Si está demasiado cerca, nos detenemos
-                command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
-            self.send_data(command)
+            # Avanzamos múltiples pasos pero ajustando la dirección en cada paso
+            steps_forward = 5  # Número de pasos hacia adelante
+            for _ in range(steps_forward):
+                self.bark()
+                # Ajustamos el giro lateral en cada iteración
+                if abs(error_x) > threshold_x:
+                    if error_x > 0:
+                        # Gira a la derecha (corrección)
+                        command = cmd.CMD_TURN_RIGHT + "#" + self.move_speed + '\n'
+                    else:
+                        # Gira a la izquierda (corrección)
+                        command = cmd.CMD_TURN_LEFT + "#" + self.move_speed + '\n'
+                    self.send_data(command)
+                else:
+                    # Detenemos el giro lateral si el gato está centrado
+                    command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
+                    self.send_data(command)
+
+                # Avanzamos si la distancia lo permite
+                if distance > self.min_distance:
+                    command = cmd.CMD_MOVE_FORWARD + "#" + self.move_speed + '\n'
+                    self.send_data(command)
+                else:
+                    command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
+                    self.send_data(command)
+                    break  # Detenemos el avance si estamos demasiado cerca
+
+                time.sleep(0.1)  # Breve pausa entre cada iteración para procesar movimientos
 
         else:
             # Si no se detecta el gato, detenemos el robot
             command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
             self.send_data(command)
+
+
 
     def bark(self):
         command = cmd.CMD_BARK + "#\n"
