@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from Client import *
 from Calibration import *
+from Sonic import *
 class MyWindow(QMainWindow,Ui_client):
     def __init__(self):
         super(MyWindow,self).__init__()
@@ -26,6 +27,8 @@ class MyWindow(QMainWindow,Ui_client):
 
         self.client=Client()
         self.client.move_speed=str(self.slider_speed.value())
+        self.sonic=Sonic(self.client)
+        self.client.initialize_sonic()
         file = open('IP.txt', 'r')
         self.lineEdit_IP_Adress.setText(str(file.readline()))
         file.close()
@@ -42,7 +45,7 @@ class MyWindow(QMainWindow,Ui_client):
         self.Button_IMU.clicked.connect(self.imu)
         self.Button_Calibration.clicked.connect(self.showCalibrationWindow)
         self.Button_LED.clicked.connect(self.showLedWindow)
-        self.Button_Sonic.clicked.connect(self.sonic)
+        self.Button_Sonic.clicked.connect(self.sonic.sonic)
         self.Button_Relax.clicked.connect(self.relax)
         self.Button_Face_ID.clicked.connect(self.showFaceWindow)
         
@@ -112,11 +115,15 @@ class MyWindow(QMainWindow,Ui_client):
         self.timer_power = QTimer(self)
         self.timer_power.timeout.connect(self.power)
 
-        self.timer_sonic = QTimer(self)
-        self.timer_sonic.timeout.connect(self.getSonicData)
+        self.timer_sonic = self.sonic.getTimerSonic()
+        self.timer_sonic.timeout.connect(self.sonic.getSonicData)
 
         self.drawpoint=[585,135]
         self.initial=True
+
+        self.timer_sonic = QTimer(self)
+        self.timer_sonic.timeout.connect(self.sonic.getSonicData)
+        self.timer_sonic.start(1000)
 
     #keyboard
     def keyPressEvent(self, event):
@@ -140,7 +147,7 @@ class MyWindow(QMainWindow,Ui_client):
             self.showLedWindow()
         if(event.key() == Qt.Key_U):
             print("U")
-            self.sonic()
+            self.sonic.sonic()
         if(event.key() == Qt.Key_F):
             print("F")
             self.chase_ball_and_find_face()
@@ -319,6 +326,7 @@ class MyWindow(QMainWindow,Ui_client):
                     self.client.tcp_flag=False
                     break
                 elif data[0]==cmd.CMD_SONIC:
+                    self.sonic.setDistance(int(data[1]))
                     self.Button_Sonic.setText(data[1]+'cm')
                     #self.label_sonic.setText('Obstacle:'+data[1]+'cm')
                     #print('Obstacle:',data[1])
@@ -346,17 +354,25 @@ class MyWindow(QMainWindow,Ui_client):
     #BALL
     def chase_ball_and_find_face(self):
         if self.Button_Ball_And_Face.text() == 'Face':
-            self.client.face_flag=True
-            self.client.ball_flag = False
+            self.client.face_flag=False
+            self.client.ball_flag = True
+            self.client.cat_flag = False
             self.Button_Ball_And_Face.setText('Ball')
         elif self.Button_Ball_And_Face.text() == 'Ball':
             self.client.face_flag=False
-            self.client.ball_flag = True
+            self.client.ball_flag = False
+            self.client.cat_flag = True
+            self.Button_Ball_And_Face.setText('Cat')
+        elif self.Button_Ball_And_Face.text() == 'Cat':
+            self.client.face_flag=False
+            self.client.ball_flag = False
+            self.client.cat_flag = False
+            self.stop()
             self.Button_Ball_And_Face.setText('Close')
         else:
-            self.client.face_flag = False
+            self.client.face_flag = True
             self.client.ball_flag = False
-            self.stop()
+            self.client.cat_flag = False
             self.Button_Ball_And_Face.setText('Face')
 
     #CONNECT
@@ -467,7 +483,12 @@ class MyWindow(QMainWindow,Ui_client):
             self.client.send_data(command)
             self.Button_Buzzer.setText('Buzzer')
             #print (command)
-            
+    #BARK
+    def bark(self):
+        command=cmd.CMD_BARK+'\n'
+        self.client.send_data(command)
+        #print (command)
+
     #BALANCE
     def imu(self):
         if self.Button_IMU.text()=='Balance':
@@ -481,21 +502,6 @@ class MyWindow(QMainWindow,Ui_client):
             self.Button_IMU.setText('Balance')
             #print (command)
 
-
-    #SNOIC
-    def sonic(self):
-        if self.Button_Sonic.text() == 'Sonic':
-            self.timer_sonic.start(100)
-            self.Button_Sonic.setText('Close')
-
-        else:
-            self.timer_sonic.stop()
-            self.Button_Sonic.setText('Sonic')
-            #
-    def getSonicData(self):
-        command=cmd.CMD_SONIC+'\n'
-        self.client.send_data(command)
-        #print (command)
     #HEIGHT
     def height(self):
         try:
