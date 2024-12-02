@@ -4,9 +4,12 @@ import copy
 import socket
 import struct
 import threading
+from Sonic import *
 from PID import *
 from Face import *
+from Cat import *
 import numpy as np
+from Sonic import Sonic
 from Thread import *
 from PIL import Image
 from Command import COMMAND as cmd
@@ -14,13 +17,21 @@ from Command import COMMAND as cmd
 class Client:
     def __init__(self):
         self.face = Face()
-        self.pid=Incremental_PID(1,0,0.0025)
-        self.tcp_flag=False
-        self.video_flag=True
-        self.ball_flag=False
-        self.face_flag=False
+        self.cat = Cat()
+        self.pid = Incremental_PID(1, 0, 0.0025)
+        self.tcp_flag = False
+        self.video_flag = True
+        self.ball_flag = False
+        self.face_flag = False
+        self.cat_flag = False
         self.face_id = False
-        self.image=''
+        self.cat_flag = False
+        self.image = ''
+        self.sonic = None  # Inicializar Sonic más adelante
+    def initialize_sonic(self):
+        from Sonic import Sonic  # Importación dentro del método para evitar ciclo
+        self.sonic = Sonic(self)
+
     def turn_on_client(self,ip):
         self.client_socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -96,6 +107,7 @@ class Client:
             command=cmd.CMD_MOVE_STOP+"#"+self.move_speed+'\n'
             self.send_data(command)
             #print (command)
+
     def receiving_video(self,ip):
         stream_bytes = b' '
         try:
@@ -112,10 +124,13 @@ class Client:
                 if self.is_valid_image_4_bytes(jpg):
                     if self.video_flag:
                         self.image = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
-                        if self.ball_flag and self.face_id==False:
+                        if self.ball_flag and self.face_id==False and self.cat_flag==False:
                            self.Looking_for_the_ball()
-                        elif self.face_flag and self.face_id==False:
+                        elif self.face_flag and self.face_id==False and self.cat_flag==False:
                             self.face.face_detect(self.image)
+                        elif self.cat_flag and self.face_id == False:  
+                            self.chase_cat(self.image)
+
                         self.video_flag=False
             except BaseException as e:
                 print (e)
@@ -131,6 +146,63 @@ class Client:
         data=""
         data=self.client_socket1.recv(1024).decode('utf-8')
         return data
- 
+
+    def chase_cat(self, img):
+        self.min_distance = 8  # Distancia mínima para detenerse
+        cat_position = self.cat.detect_cat(img)  # Solo obtenemos la posición del gato
+        if cat_position:
+            self.bark()  # Ladra si detecta al gato
+            x, y, w, h = cat_position
+            center_x = x + w // 2  # Coordenada X del centro del gato
+            img_width = img.shape[1]
+            
+            # Parámetros para el movimiento lateral
+            threshold_x = 15  # Umbral para determinar si girar a la izquierda o derecha
+            
+            # Calculamos el error en X
+            error_x = center_x - (img_width // 2)
+
+            # Verificamos la distancia con el sensor de ultrasonido
+            distance = self.sonic.getDistance()
+
+            # Avanzamos múltiples pasos pero ajustando la dirección en cada paso
+            steps_forward = 5  # Número de pasos hacia adelante
+            for _ in range(steps_forward):
+                self.bark()
+                # Ajustamos el giro lateral en cada iteración
+                if abs(error_x) > threshold_x:
+                    if error_x > 0:
+                        # Gira a la derecha (corrección)
+                        command = cmd.CMD_TURN_RIGHT + "#" + self.move_speed + '\n'
+                    else:
+                        # Gira a la izquierda (corrección)
+                        command = cmd.CMD_TURN_LEFT + "#" + self.move_speed + '\n'
+                    self.send_data(command)
+                else:
+                    # Detenemos el giro lateral si el gato está centrado
+                    command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
+                    self.send_data(command)
+
+                # Avanzamos si la distancia lo permite
+                if distance > self.min_distance:
+                    command = cmd.CMD_MOVE_FORWARD + "#" + self.move_speed + '\n'
+                    self.send_data(command)
+                else:
+                    command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
+                    self.send_data(command)
+                    break  # Detenemos el avance si estamos demasiado cerca
+
+                time.sleep(0.1)  # Breve pausa entre cada iteración para procesar movimientos
+
+        else:
+            # Si no se detecta el gato, detenemos el robot
+            command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
+            self.send_data(command)
+
+
+
+    def bark(self):
+        command = cmd.CMD_BARK + "#\n"
+        self.send_data(command)
 if __name__ == '__main__':
     pass
