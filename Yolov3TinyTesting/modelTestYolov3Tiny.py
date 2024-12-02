@@ -1,13 +1,21 @@
 import cv2
 import numpy as np
+import os
 
 # Cargar los archivos del modelo YOLO
-net = cv2.dnn.readNet("yolov3-tiny.weights", "yolov3-tiny.cfg")
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+weights_path = os.path.join(current_dir, "yolov3-tiny.weights")
+cfg_path = os.path.join(current_dir, "yolov3-tiny.cfg")
+coco_names_path = os.path.join(current_dir, "coco.names")
+
+net = cv2.dnn.readNet(weights_path, cfg_path)
+
 layer_names = net.getLayerNames()
 output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
 # Cargar las etiquetas (coco.names contiene las clases entrenadas)
-with open("coco.names", "r") as f:
+with open(coco_names_path, "r") as f:
     classes = [line.strip() for line in f.readlines()]
 
 def detect_cat(frame):
