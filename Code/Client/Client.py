@@ -148,7 +148,8 @@ class Client:
         return data
 
     def chase_cat(self, img):
-        self.min_distance = 8  # Distancia mínima para detenerse
+        self.min_distance = 10  # Distancia mínima para detenerse
+        self.min_distance = 5  # Distancia maxima para retroceder
         cat_position = self.cat.detect_cat(img)  # Solo obtenemos la posición del gato
         if cat_position:
             self.bark()  # Ladra si detecta al gato
@@ -166,7 +167,7 @@ class Client:
             distance = self.sonic.getDistance()
 
             # Avanzamos múltiples pasos pero ajustando la dirección en cada paso
-            steps_forward = 5  # Número de pasos hacia adelante
+            steps_forward = 3  # Número de pasos hacia adelante
             for _ in range(steps_forward):
                 self.bark()
                 # Ajustamos el giro lateral en cada iteración
@@ -187,6 +188,9 @@ class Client:
                 if distance > self.min_distance:
                     command = cmd.CMD_MOVE_FORWARD + "#" + self.move_speed + '\n'
                     self.send_data(command)
+                elif distance < self.min_distance:
+                    command = cmd.CMD_MOVE_BACKWARD + "#" + self.move_speed + '\n'
+                    self.send_data(command)
                 else:
                     command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
                     self.send_data(command)
@@ -198,8 +202,6 @@ class Client:
             # Si no se detecta el gato, detenemos el robot
             command = cmd.CMD_MOVE_STOP + "#" + self.move_speed + '\n'
             self.send_data(command)
-
-
 
     def bark(self):
         command = cmd.CMD_BARK + "#\n"
