@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['main.py'],
+    ['Main.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['cv2','PIL'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='main',
+    name='Main',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
